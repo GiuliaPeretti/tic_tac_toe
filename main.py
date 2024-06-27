@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 import random
+import time
 
 
 def draw_background():
@@ -42,7 +43,7 @@ def show_grid():
             pygame.draw.rect(screen, RED, ())
 
 def draw_symbol(row, col, player):
-    if(grid[row][col]==0):
+    if(grid[row][col]==0 and overall_grid[row//3][col//3]==0):
         y=row*(SQUARE_SIZE/9)+30
         x=col*(SQUARE_SIZE/9)+30
         if player:
@@ -64,6 +65,8 @@ def draw_symbol(row, col, player):
         if check_win(row, col, 2):
             print("lost")
             draw_big_symbol(row//3,col//3,False)
+        return True
+    return False
 
 
 def other_player():
@@ -118,13 +121,14 @@ def check_win(row, col, n):
     return False
     
 def draw_big_symbol(row,col,player):
+    global game_started
     y=row*(SQUARE_SIZE/3)+30
     x=col*(SQUARE_SIZE/3)+30
     pygame.draw.rect(screen, BACKGROUND_COLOR, (x,y, SQUARE_SIZE/3, SQUARE_SIZE/3))
     if player:
         
         pygame.draw.circle(screen, RED, (x+SQUARE_SIZE/9+30,y+SQUARE_SIZE/9+30), SQUARE_SIZE/9, 20)
-        grid[row][col]=1
+        overall_grid[row][col]=1
     else:
         overall_grid[row][col]=2
         offset1=20
@@ -137,13 +141,31 @@ def draw_big_symbol(row,col,player):
         pygame.draw.line(screen, WHITE, (i,30), (i,SQUARE_SIZE+30), 3)
     for i in range(30+SQUARE_SIZE//3, SQUARE_SIZE+20+1, SQUARE_SIZE//3):
         pygame.draw.line(screen, WHITE, (30,i), (SQUARE_SIZE+30,i), 3)
+    
+    pygame.display.flip()
 
-    if check_win(row, col, 1):
-        print("win")
+    if check_big_win(row, col, 1):
+        print("WIN")
         print(overall_grid)
+        font = pygame.font.SysFont('arial', 100)
+        time.sleep(1)
+        draw_background()
+        n_text=font.render(str("Red wins"), True, RED)
+        screen.blit(n_text, (100, 250))
+        game_started=False
         
-    if check_win(row, col, 2):
-        print("lost")
+    if check_big_win(row, col, 2):
+        print("LOST")
+        font = pygame.font.SysFont('arial', 100)
+        time.sleep(1)
+        draw_background()
+        n_text=font.render(str("Blue wins"), True, BLUE)
+        screen.blit(n_text, (100, 250))
+        game_started=False
+
+
+
+
 
 def check_big_win(row,col,n):
     check=True
@@ -190,12 +212,7 @@ if __name__ == '__main__':
     font = pygame.font.SysFont('arial', 20)
 
 
-    selected=-1
-    select_game=-1
-    direction=-1
-    game_started=False
-    game_ended=False
-    points_count=0
+    game_started=True
     player=True
     
 
@@ -213,15 +230,20 @@ if __name__ == '__main__':
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x,y=pygame.mouse.get_pos()
-                if (x>=30 and x<=SQUARE_SIZE+30 and y>=30 and y<=SQUARE_SIZE+30):
+                if game_started==False:
+                    game_started=True
+                    player=True
+                    draw_background()
+                    draw_grid()
+                    grid, overall_grid=gen_grid()
+                elif (x>=30 and x<=SQUARE_SIZE+30 and y>=30 and y<=SQUARE_SIZE+30):
                     col=(x-30)//(SQUARE_SIZE//9)
                     row=(y-30)//(SQUARE_SIZE//9)
-                    draw_symbol(row, col, player)  
-                    if player:
-                        player=False
-                    else:
-                        player=True
-                    print(player)                 
+                    if draw_symbol(row, col, player):  
+                        if player:
+                            player=False
+                        else:
+                            player=True
             if (event.type == pygame.KEYDOWN):
                 # up->0, right->1, down->2 left->3
                pass
