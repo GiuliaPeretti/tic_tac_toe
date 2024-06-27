@@ -27,12 +27,14 @@ def gen_grid():
     # ]
 
     grid=[]
+    overall_grid=[[0,0,0],[0,0,0],[0,0,0]]
     for i in range(9):
         temp=[]
         for j in range(9):
             temp.append(0)
         grid.append(temp)
-    return grid
+    return (grid, overall_grid)
+
 
 def show_grid():
     for i in range (len(grid)):
@@ -44,7 +46,6 @@ def draw_symbol(row, col, player):
         y=row*(SQUARE_SIZE/9)+30
         x=col*(SQUARE_SIZE/9)+30
         if player:
-            print(x,y)
             pygame.draw.circle(screen, RED, (x+30,y+30), 20, 6)
             grid[row][col]=1
         else:
@@ -54,7 +55,14 @@ def draw_symbol(row, col, player):
             pygame.draw.polygon(screen, BLUE, [(x+offset1, y+offset2), (x+offset2, y+offset1), (x+(SQUARE_SIZE/9)-offset1, y+(SQUARE_SIZE/9)-offset2), (x+(SQUARE_SIZE/9)-offset2, y+(SQUARE_SIZE/9)-offset1) ])
             pygame.draw.polygon(screen, BLUE, [(x+(SQUARE_SIZE/9)-offset2, y+offset1), (x+(SQUARE_SIZE/9)-offset1, y+offset2), (x+offset2, y+(SQUARE_SIZE/9)-offset1), (x+offset1, y+(SQUARE_SIZE/9)-offset2) ])
             grid[row][col]=2
-        check_win(row, col)
+
+        if check_win(row, col, 1):
+            print("win")
+            print(overall_grid)
+            
+        if check_win(row, col, 2):
+            print("lost")
+
 
 def other_player():
     valid_choice=[]
@@ -62,6 +70,7 @@ def other_player():
         for col in range(len(grid[row])):
             if(grid[row][col]==0):
                 valid_choice.append((row,col))
+
     row,col=random.choice(valid_choice)
     draw_symbol(row,col,False)
 
@@ -74,9 +83,54 @@ def other_player():
     #     row=random.randint(0,8)
     #     col=random.randint(0,8)   
        
-def check_win(row, col):
-    for i in 
+def check_win(row, col, n):
+    
+    row0 = (row%3)
+    col0 = (col%3)
+    print("row,col " +str((row,col)))
+    print("row0,col0 " +str((row0,col0)))
 
+    check=True
+    for i in range(1,4):
+        check=True
+        for j in range(1,4):
+            if (grid[row0*i][col0*j] != n):
+                check=False
+                break
+        if check:
+            overall_grid[row0][col0]=n
+            return True
+        
+    
+    for i in range(1,4):
+        check=True
+        for j in range(1,4):
+            if (grid[row0*i][col0*j] != n):
+                check=False
+                break
+        if check:
+            overall_grid[row0][col0]=n
+            return True    
+    check=True
+    for i in range (1,4):
+        if(grid[row0*i][col0*j] != n):
+            check=False
+            break
+    if check:
+            overall_grid[row0][col0]=n
+            return True
+    check=True
+    for i in range (1,4):
+        if(grid[row0*(2-i)][col0*i] != n):
+            check=False
+            break
+    if check:
+            overall_grid[row0][col0]=n
+            return True    
+    return False
+    
+
+    
 
 
 
@@ -98,7 +152,7 @@ if __name__ == '__main__':
 
     draw_background()
     draw_grid()
-    grid=gen_grid()
+    grid, overall_grid=gen_grid()
 
 
     run  = True
