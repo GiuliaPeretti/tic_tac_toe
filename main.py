@@ -58,10 +58,12 @@ def draw_symbol(row, col, player):
 
         if check_win(row, col, 1):
             print("win")
-            print(overall_grid)
+            draw_big_symbol(row//3,col//3,True)
+            
             
         if check_win(row, col, 2):
             print("lost")
+            draw_big_symbol(row//3,col//3,False)
 
 
 def other_player():
@@ -75,63 +77,109 @@ def other_player():
     draw_symbol(row,col,False)
 
 
-
-
-    # row=random.randint(0,8)
-    # col=random.randint(0,8)
-    # while(grid[row][col]!=0):
-    #     row=random.randint(0,8)
-    #     col=random.randint(0,8)   
-       
 def check_win(row, col, n):
     
-    row0 = (row%3)
-    col0 = (col%3)
-    print("row,col " +str((row,col)))
-    print("row0,col0 " +str((row0,col0)))
+    row0 = (row//3)*3
+    col0 = (col//3)*3
 
     check=True
-    for i in range(1,4):
+    for i in range(0,3):
         check=True
-        for j in range(1,4):
-            if (grid[row0*i][col0*j] != n):
+        for j in range(0,3):
+            if (grid[row0+i][col0+j] != n):
                 check=False
                 break
         if check:
-            overall_grid[row0][col0]=n
             return True
         
     
-    for i in range(1,4):
+    for i in range(0,3):
         check=True
-        for j in range(1,4):
-            if (grid[row0*i][col0*j] != n):
+        for j in range(0,3):
+            if (grid[row0+j][col0+i] != n):
                 check=False
                 break
         if check:
-            overall_grid[row0][col0]=n
             return True    
     check=True
-    for i in range (1,4):
-        if(grid[row0*i][col0*j] != n):
+    for i in range (0,3):
+        if(grid[row0+i][col0+i] != n):
             check=False
             break
     if check:
-            overall_grid[row0][col0]=n
             return True
     check=True
-    for i in range (1,4):
-        if(grid[row0*(2-i)][col0*i] != n):
+    for i in range (0,3):
+        if(grid[row0+(2-i)][col0+i] != n):
             check=False
             break
     if check:
-            overall_grid[row0][col0]=n
             return True    
     return False
     
-
+def draw_big_symbol(row,col,player):
+    y=row*(SQUARE_SIZE/3)+30
+    x=col*(SQUARE_SIZE/3)+30
+    pygame.draw.rect(screen, BACKGROUND_COLOR, (x,y, SQUARE_SIZE/3, SQUARE_SIZE/3))
+    if player:
+        
+        pygame.draw.circle(screen, RED, (x+SQUARE_SIZE/9+30,y+SQUARE_SIZE/9+30), SQUARE_SIZE/9, 20)
+        grid[row][col]=1
+    else:
+        overall_grid[row][col]=2
+        offset1=20
+        offset2=40
+        pygame.draw.polygon(screen, BLUE, [(x+offset1, y+offset2), (x+offset2, y+offset1), (x+(SQUARE_SIZE/3)-offset1, y+(SQUARE_SIZE/3)-offset2), (x+(SQUARE_SIZE/3)-offset2, y+(SQUARE_SIZE/3)-offset1) ])
+        pygame.draw.polygon(screen, BLUE, [(x+(SQUARE_SIZE/3)-offset2, y+offset1), (x+(SQUARE_SIZE/3)-offset1, y+offset2), (x+offset2, y+(SQUARE_SIZE/3)-offset1), (x+offset1, y+(SQUARE_SIZE/3)-offset2) ])
+        grid[row][col]=2
     
+    for i in range(30+SQUARE_SIZE//3, SQUARE_SIZE+20+1, SQUARE_SIZE//3):
+        pygame.draw.line(screen, WHITE, (i,30), (i,SQUARE_SIZE+30), 3)
+    for i in range(30+SQUARE_SIZE//3, SQUARE_SIZE+20+1, SQUARE_SIZE//3):
+        pygame.draw.line(screen, WHITE, (30,i), (SQUARE_SIZE+30,i), 3)
 
+    if check_win(row, col, 1):
+        print("win")
+        print(overall_grid)
+        
+    if check_win(row, col, 2):
+        print("lost")
+
+def check_big_win(row,col,n):
+    check=True
+    for i in range(0,3):
+        check=True
+        for j in range(0,3):
+            if (overall_grid[i][j] != n):
+                check=False
+                break
+        if check:
+            return True
+        
+    
+    for i in range(0,3):
+        check=True
+        for j in range(0,3):
+            if (overall_grid[j][i] != n):
+                check=False
+                break
+        if check:
+            return True    
+    check=True
+    for i in range (0,3):
+        if(overall_grid[i][i] != n):
+            check=False
+            break
+    if check:
+            return True
+    check=True
+    for i in range (0,3):
+        if(overall_grid[2-i][i] != n):
+            check=False
+            break
+    if check:
+            return True    
+    return False
 
 
 if __name__ == '__main__':
@@ -148,6 +196,7 @@ if __name__ == '__main__':
     game_started=False
     game_ended=False
     points_count=0
+    player=True
     
 
     draw_background()
@@ -167,8 +216,12 @@ if __name__ == '__main__':
                 if (x>=30 and x<=SQUARE_SIZE+30 and y>=30 and y<=SQUARE_SIZE+30):
                     col=(x-30)//(SQUARE_SIZE//9)
                     row=(y-30)//(SQUARE_SIZE//9)
-                    draw_symbol(row, col, True)  
-                    other_player()                  
+                    draw_symbol(row, col, player)  
+                    if player:
+                        player=False
+                    else:
+                        player=True
+                    print(player)                 
             if (event.type == pygame.KEYDOWN):
                 # up->0, right->1, down->2 left->3
                pass
